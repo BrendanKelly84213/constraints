@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include "Window.h"
+#include <iostream>
 #include "Texture.h"
 
 class Renderer {
@@ -16,6 +16,9 @@ public:
       : m_window(nullptr), m_renderer(nullptr), m_index(-1), m_flags(SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC) 
     {
     }
+
+    Renderer(const Renderer & renderer) = delete;
+    void operator=(const Renderer & renderer) = delete;
 
     ~Renderer()
     {
