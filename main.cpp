@@ -6,14 +6,6 @@
 #include "Renderer.h"
 #include "PhysicsObject.h"
 
-double lagrange_multiplier(const PhysicsObject& particle, const Vec2 external_force)
-{
-    const double mass = particle.mass();
-    const Vec2 pos = particle.pos();
-    const Vec2 vel = particle.vel();
-    return (-1 * dot_product(external_force, pos) - dot_product(mass * vel, vel)) / dot_product(pos, pos);
-}
-
 template <typename T>
 constexpr T clamp(T value, T constraint)
 {
@@ -21,25 +13,6 @@ constexpr T clamp(T value, T constraint)
         return constraint;
     return value;
 }
-
-constexpr double distance(Vec2 a, Vec2 b)
-{
-    return std::sqrt( (a.x - b.x) * (a.x - b.x)  + (a.y - b.y) * (a.y - b.y) );
-}
-
-constexpr double vec_mag(Vec2 vec)
-{
-    return distance(vec, { 0, 0 });
-}
-
-constexpr Vec2 vector_normal(Vec2 vec)
-{
-    double mag = vec_mag(vec); 
-    return (1 / mag) * vec;
-}
-
-// Assume 1cm = 1 pixel
-//
 
 const double allowed_distance = 200.0f;
 
@@ -68,16 +41,16 @@ int main()
         ticks_count = SDL_GetTicks();
 
         const Vec2 relative_pos = hinge.pos() - test.pos();
-        const double relative_distance = vec_mag(relative_pos);
+        const double relative_distance = relative_pos.magnitude();
         const double offset = relative_distance - allowed_distance;
 
         Vec2 test_total_force = force_gravity;
 
         if(offset > 0.0f && dt > 0) {
 
-            Vec2 offset_direction = vector_normal(relative_pos);
+            Vec2 offset_direction = relative_pos.normal();
 
-            const double velocity_dot = dot_product(test.vel(), offset_direction);
+            const double velocity_dot = Vec2::dot_product(test.vel(), offset_direction);
             const double bias_factor = 0.01f;
             const double bias = -(bias_factor / dt) * offset;
 

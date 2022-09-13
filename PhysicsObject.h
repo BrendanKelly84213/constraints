@@ -2,37 +2,8 @@
 
 #include "Renderer.h"
 #include "Texture.h"
-#include "cassert"
+#include "Math.h"
 
-struct Vec2 {
-    double x;
-    double y;
-};
-
-constexpr Vec2 operator * (Vec2 a, double b)
-{
-    return { a.x * b, a.y * b };
-}
-
-constexpr Vec2 operator * (double a, Vec2 b)
-{
-    return { a * b.x, a * b.y };
-}
-
-constexpr Vec2 operator + (Vec2 a, Vec2 b)
-{
-    return { a.x + b.x, a.y + b.y };
-}
-
-constexpr Vec2 operator - (Vec2 a, Vec2 b)
-{
-    return { a.x - b.x, a.y - b.y };
-}
-
-constexpr double dot_product(Vec2 a, Vec2 b)
-{
-    return a.x * b.x + a.y * b.y;
-}
 
 struct PhysicsObject {
 // private:
