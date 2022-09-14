@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
-#include "Texture.h"
-#include "Math.h"
+#include "Vec2.h"
 
 
 struct PhysicsObject {
@@ -36,12 +35,6 @@ struct PhysicsObject {
     {
         m_vel = m_vel + m_accel * dt;
         m_pos = m_pos + m_vel * dt;
-    }
-
-    // Draw a texture at the objects location within its constraints
-    void draw(Renderer & renderer, Texture & tex)
-    {
-        renderer.draw(tex, std::floor(m_pos.x), std::round(m_pos.y), m_w, m_h);
     }
 
     Vec2 pos() const { return m_pos; }
