@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Vec2.h"
+#include "DistanceConstraint.h"
 
 class Renderer {
 private:
@@ -115,6 +116,19 @@ public:
     {
         SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
         return SDL_RenderDrawLine(m_renderer, a.x, a.y, b.x, b.y);
+    }
+
+    int draw_line(const DistanceConstraint & dc)
+    {
+        Vec2 p = dc.p_pos();
+        Vec2 q = dc.q_pos();
+        return draw_line(p, q);
+    }
+
+    int draw_point(Vec2 p)
+    {
+        SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+        return SDL_RenderDrawPoint(m_renderer, p.x, p.y);
     }
 
     int w() const  
