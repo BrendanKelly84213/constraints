@@ -14,10 +14,18 @@ struct PhysicsObject {
     int m_h;
     
 // public:
+    PhysicsObject() = default;
+
+    PhysicsObject(Vec2 pos, double mass) 
+        : m_pos(pos), m_vel({0, 0}), m_accel({0, 0}), m_mass(mass), m_w(0), m_h(0) 
+    {
+    }
+
     PhysicsObject(Vec2 pos, Vec2 vel, Vec2 accel, double mass, int w, int h) 
         : m_pos(pos), m_vel(vel), m_accel(accel), m_mass(mass), m_w(w), m_h(h) 
     {
     }
+
 
     void apply_force(Vec2 force)
     {
