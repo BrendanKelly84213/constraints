@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Renderer.h"
 #include "Vec2.h"
 
+// TODO: Rename member variables
 
 struct PhysicsObject {
 // private:
-    Vec2 m_pos;
-    Vec2 m_vel;
+    Vec2 m_current_pos;
+    Vec2 m_old_pos;
     Vec2 m_accel;
     double m_mass;
     int m_w;
@@ -17,12 +17,12 @@ struct PhysicsObject {
     PhysicsObject() = default;
 
     PhysicsObject(Vec2 pos, double mass) 
-        : m_pos(pos), m_vel({0, 0}), m_accel({0, 0}), m_mass(mass), m_w(0), m_h(0) 
+        : m_current_pos(pos), m_old_pos(pos), m_accel({0, 0}), m_mass(mass), m_w(0), m_h(0) 
     {
     }
 
-    PhysicsObject(Vec2 pos, Vec2 vel, Vec2 accel, double mass, int w, int h) 
-        : m_pos(pos), m_vel(vel), m_accel(accel), m_mass(mass), m_w(w), m_h(h) 
+    PhysicsObject(Vec2 pos, Vec2 accel, double mass, int w, int h) 
+        : m_current_pos(pos), m_old_pos(pos), m_accel(accel), m_mass(mass), m_w(w), m_h(h) 
     {
     }
 
@@ -35,18 +35,25 @@ struct PhysicsObject {
 
     void apply_linear_impulse(Vec2 force)
     {
-        m_vel = m_vel + force * inverse_mass();
     }
 
-    // Update velocity and position 
-    void update(double dt)
+    // Update position 
+    void update_position(double dt)
     {
-        m_vel = m_vel + m_accel * dt;
-        m_pos = m_pos + m_vel * dt;
+        Vec2 vel = m_current_pos - m_old_pos;
+        m_old_pos = m_current_pos;
+        m_current_pos = m_current_pos + vel + m_accel * dt * dt;
+
+        m_accel = {};
     }
 
-    Vec2 pos() const { return m_pos; }
-    Vec2 vel() const { return m_vel; }
+    void accelerate(Vec2 acc)
+    {
+        m_accel += acc;
+    }
+
+    Vec2 pos() const { return m_current_pos; }
+    Vec2 vel() const { return m_current_pos - m_old_pos; }
     Vec2 accel() const { return m_accel; }
     double mass() const { return m_mass; }
     double inverse_mass() const 

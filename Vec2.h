@@ -26,6 +26,20 @@ struct Vec2 {
         return (1 / magnitude()) * (*this);
     }
 
+    Vec2& operator +=(const Vec2 & a)
+    {
+        x += a.x;
+        y += a.y;
+        return *this;
+    }
+
+    Vec2& operator-= (const Vec2 & a)
+    {
+        x -= a.x;
+        y -= a.y;
+        return *this;
+    }
+
     friend Vec2 operator * (const Vec2 & a, double b)
     {
         return { a.x * b, a.y * b };
@@ -44,5 +58,10 @@ struct Vec2 {
     friend Vec2 operator - (const Vec2 & a, const Vec2 & b)
     {
         return { a.x - b.x, a.y - b.y };
+    }
+
+    friend Vec2 operator / (const Vec2 & a, double b)
+    {
+        return a * (1 / b);
     }
 };

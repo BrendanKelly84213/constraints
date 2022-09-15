@@ -72,14 +72,31 @@ int main()
             break;
 
 
-        for(auto & i : intersections) {
-            i.apply_force({ 0, i.mass() * 981 });
-        }
+        double dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
+        ticks_count = SDL_GetTicks();
+
+
         for(size_t i = 0; i < 5; ++i ) {
-            double dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
-            ticks_count = SDL_GetTicks();
+            double sub_dt = dt / 5.0f;
+            for(size_t j = 0; j < num_points; ++j) {
+                PhysicsObject & i = intersections[j];
+                if(j == 0 ) {
+                    if(i.m_current_pos.y != pos.y)
+                        i.m_current_pos.y = pos.y;
+                    if(i.m_current_pos.x != pos.x)
+                        i.m_current_pos.x = pos.x;
+                }
+
+                if(j == num_points - 1) {
+                    if(i.m_current_pos.y != pos.y)
+                        i.m_current_pos.y = pos.y;
+                    if(i.m_current_pos.x != pos.x + allowed_distance * num_links)
+                        i.m_current_pos.x = pos.x + allowed_distance * num_links;
+                }
+                i.accelerate({ 0, 981 });
+            }
             for(auto c : constraints) {
-                c.update(dt);
+                c.update(sub_dt);
             }
         }
         
