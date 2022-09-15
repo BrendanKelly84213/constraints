@@ -10,6 +10,11 @@ private:
     double m_bias_factor;
 
 public:
+    DistanceConstraint() 
+        : m_p(nullptr), m_q(nullptr), m_preferred_distance(0), m_bias_factor(0)
+    {
+    }
+
     DistanceConstraint(PhysicsObject * p, PhysicsObject * q, double preferred_distance, double bias_factor)
         : m_p(p), m_q(q), m_preferred_distance(preferred_distance), m_bias_factor(bias_factor)
     {
@@ -39,5 +44,15 @@ public:
         
         m_p->update(dt);
         m_q->update(dt);
+    }
+
+    Vec2 p_pos() const 
+    { 
+        return m_p->pos(); 
+    }
+
+    Vec2 q_pos() const 
+    { 
+        return m_q->pos(); 
     }
 };
