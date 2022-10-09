@@ -17,12 +17,12 @@ constexpr T clamp(T value, T constraint)
     return value;
 }
 
-const double allowed_distance = 30.0f;
-const Vec2 pos {300, 100}; 
-const double bias_factor = 0.01f;
+const float allowed_distance = 10.0f;
+const Vec2 pos {100, 100}; 
+const float bias_factor = 0.05f;
 
-const size_t num_rows = 10;
-const size_t num_cols = 10;
+const size_t num_rows = 30;
+const size_t num_cols = 50;
 const size_t num_points = num_rows * num_cols;
 const size_t num_links = ((num_rows - 1) * num_cols) + ((num_cols - 1) * num_rows);
 
@@ -70,17 +70,6 @@ int main()
         }
     }
 
-    std::cout << "-- INTERSECTIONS -- \n";
-    for(auto i : intersections) {
-        std::cout << "x: " << i.pos().x << " y: " << i.pos().y << '\n';
-    }
-
-    std::cout << "-- CONSTRAINTS -- \n";
-    for(auto c : constraints) {
-        std::cout << "P: x: " << c.p_pos().x << " y: " << c.p_pos().y << '\n';
-        std::cout << "Q: x: " << c.q_pos().x << " y: " << c.q_pos().y << '\n';
-    }
-
     SDL_Event event;
     uint32_t ticks_count = SDL_GetTicks();
     while (1) {
@@ -90,37 +79,27 @@ int main()
             break;
 
 
-        double dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
+        float dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
-#if 1
-        const size_t num_iterations = 20;
+        const size_t num_iterations = 50;
         for(size_t i = 0; i <= num_iterations; ++i ) {
-            float sub_dt = dt / (num_iterations * 1.0f);
+            float sub_dt = dt / (static_cast<float>(num_iterations));
 
             for(auto& point : intersections) {
                 point.apply_force({ 0, 1000 });
-                // point.apply_force({ 55, 0 });
+                point.apply_force({ 100, 0 });
             }
 
-            for(auto c : constraints) {
+            for(auto& c : constraints) {
                 c.update(sub_dt);
             }
 
-            for(size_t j = 0; j < num_points; ++j) {
-                PhysicsObject& point = intersections[j];
-
+            for(auto& point : intersections) {
+                point.update_velocity(sub_dt);
                 point.update_position(sub_dt);
             }
-
-            for(size_t j = 0; j < num_points; ++j) {
-                PhysicsObject& point = intersections[j];
-
-                point.update_velocity(sub_dt);
-            }
         }
-        #endif
-        
 
         renderer.clear();
 

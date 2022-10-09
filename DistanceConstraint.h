@@ -30,9 +30,13 @@ public:
         const Vec2 normal = relative_pos / relative_distance;
         const double offset = m_preferred_distance - relative_distance;
 
+        if(relative_distance <= m_preferred_distance)
+            return;
+
         if(std::abs(offset) > 0) {
 
             // --- Black Box ---
+            // https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/8constraintsandsolvers/Physics%20-%20Constraints%20and%20Solvers.pdf
             float constraint_mass = m_p->inverse_mass() + m_q->inverse_mass();
             Vec2 relative_velocity = m_p->vel() - m_q->vel();
             float velocity_dot = Vec2::dot_product(relative_velocity, normal);
