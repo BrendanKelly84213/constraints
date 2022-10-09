@@ -4,8 +4,8 @@
 
 // TODO: Rename member variables
 
-struct PhysicsObject {
-// private:
+class PhysicsObject {
+private:
     Vec2 m_current_pos;
     Vec2 m_old_pos;
     Vec2 m_velocity;
@@ -16,7 +16,7 @@ struct PhysicsObject {
     int m_h;
     bool m_fixed;
     
-// public:
+public:
     PhysicsObject() = default;
 
     PhysicsObject(Vec2 pos, double mass) 
@@ -30,7 +30,7 @@ struct PhysicsObject {
     }
 
     PhysicsObject(Vec2 pos, Vec2 accel, double mass, int w, int h) 
-        : m_current_pos(pos), m_old_pos(pos), m_accel(accel), m_mass(mass), m_w(w), m_h(h) 
+        : m_current_pos(pos), m_old_pos(pos), m_accel(accel), m_mass(mass), m_w(w), m_h(h), m_fixed(false)
     {
     }
 
@@ -75,6 +75,8 @@ struct PhysicsObject {
     Vec2 pos() const { return m_current_pos; }
     Vec2 vel() const { return m_velocity; }
     Vec2 accel() const { return m_accel; }
+    bool fixed() const { return m_fixed; }
+    void set_fixed(bool fixed) { m_fixed = fixed; }
     double mass() const { return m_mass; }
     double inverse_mass() const 
     {

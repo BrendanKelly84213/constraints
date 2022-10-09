@@ -20,7 +20,6 @@ public:
     {
     }
 
-
     void update(double dt)
     {
         if(dt == 0)

@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <cstdlib>
 #include <unistd.h>
+#include <vector>
 
 #include "Renderer.h"
 #include "PhysicsObject.h"
@@ -16,19 +17,31 @@ constexpr T clamp(T value, T constraint)
     return value;
 }
 
-const double allowed_distance = 50.0f;
+const double allowed_distance = 30.0f;
 const Vec2 pos {300, 100}; 
 const double bias_factor = 0.01f;
 
-const size_t num_points = 5;
-const size_t num_links = num_points - 1;
+const size_t num_rows = 10;
+const size_t num_cols = 10;
+const size_t num_points = num_rows * num_cols;
+const size_t num_links = ((num_rows - 1) * num_cols) + ((num_cols - 1) * num_rows);
 
 PhysicsObject intersections[num_points];
-DistanceConstraint constraints[num_links];
+std::vector<DistanceConstraint> constraints;
 
 Vec2 scale(size_t i, size_t j) 
 {
     return {pos.x + i * allowed_distance * 1.0f, pos.y + j * allowed_distance * 1.0f};
+}
+
+unsigned point_index(size_t i, size_t j)
+{
+    return i * num_rows + j;
+}
+
+void add_link(PhysicsObject* a, PhysicsObject* b) 
+{
+    constraints.push_back(DistanceConstraint(a, b, allowed_distance, bias_factor));
 }
 
 int main()
@@ -37,15 +50,24 @@ int main()
     if(!renderer.create("Cloth", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE))
         return 1;
 
+    for(size_t i = 0; i < num_cols; ++i) {
+        for(size_t j = 0; j < num_rows; ++j) {
+            unsigned pi = point_index(i, j);
+            intersections[pi] = PhysicsObject(scale(i, j), 1);
 
-    for(size_t i = 0; i < num_points; ++i) {
-        intersections[i] = PhysicsObject(scale(i, 0), 1);
-        if(i == 0 || i == num_points - 1)
-            intersections[i].m_fixed = true;
-    }
+            if(j == 0)
+                intersections[pi].set_fixed(true);
 
-    for(size_t i = 0; i < num_links; ++i) {
-        constraints[i] = DistanceConstraint(&intersections[i], &intersections[i + 1], allowed_distance, bias_factor);
+            if(i > 0) {
+                unsigned pi_left = point_index(i - 1, j);
+                add_link(&intersections[pi], &intersections[pi_left]);
+            }
+
+            if(j > 0) {
+                unsigned pi_up = point_index(i, j - 1);
+                add_link(&intersections[pi], &intersections[pi_up]);
+            }
+        }
     }
 
     std::cout << "-- INTERSECTIONS -- \n";
@@ -71,14 +93,14 @@ int main()
         double dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
-        const size_t num_iterations = 8;
+#if 1
+        const size_t num_iterations = 20;
         for(size_t i = 0; i <= num_iterations; ++i ) {
             float sub_dt = dt / (num_iterations * 1.0f);
 
-            for(size_t j = 0; j < num_points; ++j) {
-                PhysicsObject& point = intersections[j];
-
+            for(auto& point : intersections) {
                 point.apply_force({ 0, 1000 });
+                // point.apply_force({ 55, 0 });
             }
 
             for(auto c : constraints) {
@@ -91,20 +113,23 @@ int main()
                 point.update_position(sub_dt);
             }
 
-           
-
             for(size_t j = 0; j < num_points; ++j) {
                 PhysicsObject& point = intersections[j];
 
                 point.update_velocity(sub_dt);
             }
         }
+        #endif
         
 
         renderer.clear();
 
         for(auto c : constraints) {
             renderer.draw_line(c);
+        }
+
+        for(auto& point : intersections) {
+            renderer.draw_point(point.pos());
         }
 
         renderer.present();
