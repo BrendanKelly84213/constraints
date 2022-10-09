@@ -18,7 +18,7 @@ constexpr T clamp(T value, T constraint)
 
 const double allowed_distance = 50.0f;
 const Vec2 pos {300, 100}; 
-const double bias_factor = 0.5f;
+const double bias_factor = 0.01f;
 
 const size_t num_points = 5;
 const size_t num_links = num_points - 1;
@@ -71,14 +71,18 @@ int main()
         double dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
-        const size_t num_iterations = 20;
+        const size_t num_iterations = 8;
         for(size_t i = 0; i <= num_iterations; ++i ) {
             float sub_dt = dt / (num_iterations * 1.0f);
 
             for(size_t j = 0; j < num_points; ++j) {
                 PhysicsObject& point = intersections[j];
 
-                point.accelerate({ 0, 1000 });
+                point.apply_force({ 0, 1000 });
+            }
+
+            for(auto c : constraints) {
+                c.update(sub_dt);
             }
 
             for(size_t j = 0; j < num_points; ++j) {
@@ -87,9 +91,7 @@ int main()
                 point.update_position(sub_dt);
             }
 
-            for(auto c : constraints) {
-                c.update(sub_dt);
-            }
+           
 
             for(size_t j = 0; j < num_points; ++j) {
                 PhysicsObject& point = intersections[j];

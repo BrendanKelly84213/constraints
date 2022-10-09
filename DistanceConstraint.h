@@ -19,20 +19,36 @@ public:
         : m_p(p), m_q(q), m_preferred_distance(preferred_distance), m_bias_factor(bias_factor)
     {
     }
-    
+
+
     void update(double dt)
     {
+        if(dt == 0)
+            return;
+
         const Vec2 relative_pos = m_p->pos() - m_q->pos();
         const double relative_distance = relative_pos.magnitude();
         const Vec2 normal = relative_pos / relative_distance;
-        const double offset = relative_distance - m_preferred_distance;
+        const double offset = m_preferred_distance - relative_distance;
 
         if(std::abs(offset) > 0) {
-            Vec2 p = -offset / (m_p->mass() + m_q->mass()) * normal;
-            if(!m_p->m_fixed)
-                m_p->m_current_pos += (p / m_p->mass());
-            if(!m_q->m_fixed)
-                m_q->m_current_pos -= (p / m_q->mass());
+
+            // --- Black Box ---
+            float constraint_mass = m_p->inverse_mass() + m_q->inverse_mass();
+            Vec2 relative_velocity = m_p->vel() - m_q->vel();
+            float velocity_dot = Vec2::dot_product(relative_velocity, normal);
+            float bias = -(m_bias_factor / dt) * offset;
+            float lambda = -(velocity_dot + bias) / constraint_mass;
+
+            Vec2 p_impulse = normal * lambda;
+            Vec2 q_impulse = -1 * normal * lambda;
+            // -----------------
+
+            Vec2 p_force = p_impulse / dt;
+            Vec2 q_force = q_impulse / dt;
+
+            m_p->apply_force(p_force);
+            m_q->apply_force(q_force);
         }
     }
 
