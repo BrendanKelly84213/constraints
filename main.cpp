@@ -16,11 +16,11 @@ constexpr T clamp(T value, T constraint)
     return value;
 }
 
-const double allowed_distance = 100.0f;
-const Vec2 pos {100, 100}; 
-const double bias_factor = 0.01f;
+const double allowed_distance = 50.0f;
+const Vec2 pos {300, 100}; 
+const double bias_factor = 0.5f;
 
-const size_t num_points = 10;
+const size_t num_points = 5;
 const size_t num_links = num_points - 1;
 
 PhysicsObject intersections[num_points];
@@ -34,22 +34,18 @@ Vec2 scale(size_t i, size_t j)
 int main()
 {
     Renderer renderer;
-    if(!renderer.create("Cloth", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1000, 800, SDL_WINDOW_RESIZABLE))
+    if(!renderer.create("Cloth", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE))
         return 1;
 
 
     for(size_t i = 0; i < num_points; ++i) {
-        double mass;
-        if(i == 0 || i == num_links)
-            mass = 0;
-        else 
-            mass = 1;
-
-        intersections[i] = PhysicsObject(scale(i, 0), mass);
+        intersections[i] = PhysicsObject(scale(i, 0), 1);
+        if(i == 0 || i == num_points - 1)
+            intersections[i].m_fixed = true;
     }
 
     for(size_t i = 0; i < num_links; ++i) {
-        constraints[i] = DistanceConstraint(&intersections[i], &intersections[i + 1], allowed_distance, 0.05f);
+        constraints[i] = DistanceConstraint(&intersections[i], &intersections[i + 1], allowed_distance, bias_factor);
     }
 
     std::cout << "-- INTERSECTIONS -- \n";
@@ -75,28 +71,30 @@ int main()
         double dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
+        const size_t num_iterations = 20;
+        for(size_t i = 0; i <= num_iterations; ++i ) {
+            float sub_dt = dt / (num_iterations * 1.0f);
 
-        for(size_t i = 0; i < 5; ++i ) {
-            double sub_dt = dt / 5.0f;
             for(size_t j = 0; j < num_points; ++j) {
-                PhysicsObject & i = intersections[j];
-                if(j == 0 ) {
-                    if(i.m_current_pos.y != pos.y)
-                        i.m_current_pos.y = pos.y;
-                    if(i.m_current_pos.x != pos.x)
-                        i.m_current_pos.x = pos.x;
-                }
+                PhysicsObject& point = intersections[j];
 
-                if(j == num_points - 1) {
-                    if(i.m_current_pos.y != pos.y)
-                        i.m_current_pos.y = pos.y;
-                    if(i.m_current_pos.x != pos.x + allowed_distance * num_links)
-                        i.m_current_pos.x = pos.x + allowed_distance * num_links;
-                }
-                i.accelerate({ 0, 981 });
+                point.accelerate({ 0, 1000 });
             }
+
+            for(size_t j = 0; j < num_points; ++j) {
+                PhysicsObject& point = intersections[j];
+
+                point.update_position(sub_dt);
+            }
+
             for(auto c : constraints) {
                 c.update(sub_dt);
+            }
+
+            for(size_t j = 0; j < num_points; ++j) {
+                PhysicsObject& point = intersections[j];
+
+                point.update_velocity(sub_dt);
             }
         }
         

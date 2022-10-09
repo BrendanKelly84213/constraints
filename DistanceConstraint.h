@@ -25,13 +25,15 @@ public:
         const Vec2 relative_pos = m_p->pos() - m_q->pos();
         const double relative_distance = relative_pos.magnitude();
         const Vec2 normal = relative_pos / relative_distance;
-        const double offset = m_preferred_distance - relative_distance;
-        
-        m_p->m_current_pos += 0.5f * offset * normal; 
-        m_q->m_current_pos -= 0.5f * offset * normal; 
+        const double offset = relative_distance - m_preferred_distance;
 
-        m_p->update_position(dt);
-        m_q->update_position(dt);
+        if(std::abs(offset) > 0) {
+            Vec2 p = -offset / (m_p->mass() + m_q->mass()) * normal;
+            if(!m_p->m_fixed)
+                m_p->m_current_pos += (p / m_p->mass());
+            if(!m_q->m_fixed)
+                m_q->m_current_pos -= (p / m_q->mass());
+        }
     }
 
     Vec2 p_pos() const 
