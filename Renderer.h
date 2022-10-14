@@ -15,7 +15,7 @@ private:
 
 public:
     Renderer()
-      : m_window(nullptr), m_renderer(nullptr), m_index(-1), m_flags(SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC) 
+      : m_window(nullptr), m_renderer(nullptr), m_index(-1), m_flags(SDL_RENDERER_ACCELERATED) 
     {
     }
 
