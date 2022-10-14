@@ -9,28 +9,20 @@ private:
     double m_preferred_distance;
     double m_bias_factor;
 
-public:
-    DistanceConstraint() 
-        : m_p(nullptr), m_q(nullptr), m_preferred_distance(0), m_bias_factor(0)
-    {
-    }
+    bool m_hard;
+    bool m_connected;
 
-    DistanceConstraint(PhysicsObject * p, PhysicsObject * q, double preferred_distance, double bias_factor)
-        : m_p(p), m_q(q), m_preferred_distance(preferred_distance), m_bias_factor(bias_factor)
+    void update_soft(double dt)
     {
-    }
-
-    void update(double dt)
-    {
-        if(dt == 0)
-            return;
-
         const Vec2 relative_pos = m_p->pos() - m_q->pos();
         const double relative_distance = relative_pos.magnitude();
         const Vec2 normal = relative_pos / relative_distance;
         const double offset = m_preferred_distance - relative_distance;
 
-        if(relative_distance <= m_preferred_distance)
+        if(relative_distance > m_preferred_distance * 3)
+            m_connected = false;
+
+        if(relative_distance <= m_preferred_distance || !m_connected)
             return;
 
         if(std::abs(offset) > 0) {
@@ -55,13 +47,59 @@ public:
         }
     }
 
-    Vec2 p_pos() const 
-    { 
-        return m_p->pos(); 
+    void update_hard()
+    {
+        const Vec2 relative_pos = m_p->pos() - m_q->pos();
+        const double relative_distance = relative_pos.magnitude();
+
+        if(relative_distance > m_preferred_distance * 5)
+            m_connected = false;
+
+        if(relative_distance <= m_preferred_distance || !m_connected)
+            return;
+
+        const Vec2 normal = relative_pos / relative_distance;
+        const double offset = m_preferred_distance - relative_distance;
+
+        m_p->move(0.5f * offset * normal);
+        m_q->move(-0.5f * offset * normal);
+    }
+public:
+    DistanceConstraint() 
+        : m_p(nullptr), m_q(nullptr), m_preferred_distance(0), m_bias_factor(0), m_hard(true), m_connected(true)
+    {
     }
 
-    Vec2 q_pos() const 
-    { 
-        return m_q->pos(); 
+    DistanceConstraint(PhysicsObject * p, PhysicsObject * q, double preferred_distance, double bias_factor)
+        : m_p(p), m_q(q), m_preferred_distance(preferred_distance), m_bias_factor(bias_factor), m_hard(true), m_connected(true)
+    {
     }
+
+    DistanceConstraint(PhysicsObject * p, PhysicsObject * q, double preferred_distance, double bias_factor, bool hard)
+        : m_p(p), m_q(q), m_preferred_distance(preferred_distance), m_bias_factor(bias_factor), m_hard(hard), m_connected(true)
+    {
+    }
+
+    DistanceConstraint(PhysicsObject * p, PhysicsObject * q, double preferred_distance, double bias_factor, bool hard, bool connected)
+        : m_p(p), m_q(q), m_preferred_distance(preferred_distance), m_bias_factor(bias_factor), m_hard(hard), m_connected(connected)
+    {
+    }
+
+    void update(double dt) 
+    {
+        if(dt == 0)
+            return;
+        if(m_hard)
+            update_hard();
+        else update_soft(dt);
+    }
+
+    Vec2 p_pos() const { return m_p->pos(); }
+    Vec2 q_pos() const { return m_q->pos(); }
+    bool hard() const { return m_hard; }
+    bool connected() const { return m_connected; }
+    void set_connected(bool connected) { m_connected = connected; }
+    void set_preferred_distance(float preferred_distance) { m_preferred_distance = preferred_distance; }
+    float distance() const { return Vec2::distance(m_p->pos(), m_q->pos()); }
+    bool has(PhysicsObject object) const { return object.id() == m_p->id() || object.id() == m_q->id(); }
 };
