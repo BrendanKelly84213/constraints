@@ -21,7 +21,7 @@ const Vec2 pos {100, 100};
 const float bias_factor = 0.05f;
 
 const size_t num_rows = 20;
-const size_t num_cols = 25;
+const size_t num_cols = 40;
 const size_t num_points = num_rows * num_cols;
 const size_t num_links = ((num_rows - 1) * num_cols) + ((num_cols - 1) * num_rows);
 
@@ -30,7 +30,7 @@ std::vector<DistanceConstraint> constraints;
 
 Vec2 scale(size_t i, size_t j) 
 {
-    return {pos.x + i * allowed_distance * 1.0f, pos.y + j * allowed_distance * 1.0f};
+    return {pos.x + i * allowed_distance * 1.0f - 1, pos.y + j * allowed_distance * 1.0f - 1};
 }
 
 unsigned point_index(size_t i, size_t j)
@@ -72,7 +72,6 @@ int main()
 
     PhysicsObject mouse_object({0, 0}, 1.0f, true);
     mouse_object.set_id(point_index(num_cols, num_rows) + 1);
-
     for(auto& point : intersections) {
         constraints.push_back(DistanceConstraint(&point, &mouse_object, 0.0f, 0.1f, false, false));
     }
@@ -80,6 +79,9 @@ int main()
     SDL_Event event;
     uint32_t ticks_count = SDL_GetTicks();
     
+    bool dragging = false;
+    bool grabbed = false;
+    bool cutting = false;
     while (1) {
 
         int mouse_x, mouse_y;
@@ -90,27 +92,34 @@ int main()
         if (event.type == SDL_QUIT) 
             break;
         else if(event.type == SDL_MOUSEBUTTONDOWN) {
-            for(auto& constraint : constraints) {
-                if(constraint.has(mouse_object) && constraint.distance() < 26.0f) {
-                    constraint.set_preferred_distance(26.0f);
-                    constraint.set_connected(true);
-                    break;
-                }
-            }
+            if(event.button.button == SDL_BUTTON_LEFT)
+                dragging = true;
+            else if(event.button.button == SDL_BUTTON_RIGHT)
+                cutting = true;
         } else if(event.type == SDL_MOUSEBUTTONUP) {
-            for(auto& constraint : constraints) {
-                if(constraint.has(mouse_object)) {
-                    constraint.set_connected(false);
-                }
-            }
+            dragging = false;
+            grabbed = false;
+            cutting = false;
         }
 
+        for(auto& constraint : constraints) {
+            if(dragging && !grabbed && constraint.has(mouse_object) && constraint.distance() < 26.0f) {
+                constraint.set_preferred_distance(26.0f);
+                constraint.set_connected(true);
+                grabbed = true;
+                break;
+            } else if(!dragging && constraint.has(mouse_object)) {
+                constraint.set_connected(false);
+            } else if(cutting && Vec2::distance(constraint.p_pos(), mouse_object.pos()) < allowed_distance && Vec2::distance(constraint.q_pos(), mouse_object.pos()) < allowed_distance){
+                constraint.set_connected(false);
+            }
+        }
 
         float dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
         const size_t num_iterations = 16;
-        for(size_t i = 0; i <= num_iterations; ++i ) {
+        for(size_t i = 0; i <= num_iterations; ++i) {
 
             float sub_dt = dt / (static_cast<float>(num_iterations));
 
