@@ -19,7 +19,7 @@ private:
         const Vec2 normal = relative_pos / relative_distance;
         const double offset = m_preferred_distance - relative_distance;
 
-        if(relative_distance > m_preferred_distance * 3)
+        if(relative_distance > m_preferred_distance * 20)
             m_connected = false;
 
         if(relative_distance <= m_preferred_distance || !m_connected)
@@ -52,7 +52,7 @@ private:
         const Vec2 relative_pos = m_p->pos() - m_q->pos();
         const double relative_distance = relative_pos.magnitude();
 
-        if(relative_distance > m_preferred_distance * 5)
+        if(relative_distance > m_preferred_distance * 20)
             m_connected = false;
 
         if(relative_distance <= m_preferred_distance || !m_connected)
@@ -102,4 +102,5 @@ public:
     void set_preferred_distance(float preferred_distance) { m_preferred_distance = preferred_distance; }
     float distance() const { return Vec2::distance(m_p->pos(), m_q->pos()); }
     bool has(PhysicsObject object) const { return object.id() == m_p->id() || object.id() == m_q->id(); }
+    Vec2 line() const { return p_pos() - q_pos(); }
 };
