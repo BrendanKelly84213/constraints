@@ -16,12 +16,12 @@ constexpr T clamp(T value, T constraint)
     return value;
 }
 
-const float allowed_distance = 12.0f;
+const float allowed_distance = 8.0f;
 const Vec2 pos {100, 100}; 
 const float bias_factor = 0.05f;
 
-const size_t num_rows = 20;
-const size_t num_cols = 40;
+const size_t num_rows = 30;
+const size_t num_cols = 50;
 const size_t num_points = num_rows * num_cols;
 const size_t num_links = ((num_rows - 1) * num_cols) + ((num_cols - 1) * num_rows);
 
@@ -49,21 +49,21 @@ int main()
     if(!renderer.create("Cloth", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_RESIZABLE))
         return 1;
 
-    for(size_t i = 0; i < num_cols; ++i) {
-        for(size_t j = 0; j < num_rows; ++j) {
+    for(size_t i = num_cols - 1; i > 0; --i) {
+        for(size_t j = num_rows - 1; j > 0; --j) {
             unsigned pi = point_index(i, j);
             intersections[pi] = PhysicsObject(scale(i, j), 1);
             intersections[pi].set_id(point_index(i, j));
 
-            if(j == 0)
+            if(j == 1)
                 intersections[pi].set_fixed(true);
 
-            if(i > 0) {
+            if(i > 1) {
                 unsigned pi_left = point_index(i - 1, j);
                 add_link(&intersections[pi], &intersections[pi_left]);
             }
 
-            if(j > 0) {
+            if(j > 1) {
                 unsigned pi_up = point_index(i, j - 1);
                 add_link(&intersections[pi], &intersections[pi_up]);
             }
@@ -73,7 +73,7 @@ int main()
     PhysicsObject mouse_object({0, 0}, 1.0f, true);
     mouse_object.set_id(point_index(num_cols, num_rows) + 1);
     for(auto& point : intersections) {
-        constraints.push_back(DistanceConstraint(&point, &mouse_object, 0.0f, 0.1f, false, false));
+        constraints.push_back(DistanceConstraint(&point, &mouse_object, 0.0f, 0.07f, false, false));
     }
 
     SDL_Event event;
@@ -118,7 +118,7 @@ int main()
         float dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
-        const size_t num_iterations = 16;
+        const size_t num_iterations = 14;
         for(size_t i = 0; i <= num_iterations; ++i) {
 
             float sub_dt = dt / (static_cast<float>(num_iterations));
@@ -153,12 +153,7 @@ int main()
                 renderer.draw_line(c);
         }
 
-        for(auto& point : intersections) {
-            renderer.draw_point(point.pos());
-        }
-
         renderer.present();
-
     }
 
     SDL_Quit();
