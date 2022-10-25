@@ -8,14 +8,6 @@
 #include "PhysicsObject.h"
 #include "DistanceConstraint.h"
 
-template <typename T>
-constexpr T clamp(T value, T constraint)
-{
-    if(value > constraint)
-        return constraint;
-    return value;
-}
-
 const float allowed_distance = 8.0f;
 const Vec2 pos {100, 100}; 
 const float bias_factor = 0.05f;
