@@ -9,20 +9,20 @@
 #include "DistanceConstraint.h"
 
 const float allowed_distance = 8.0f;
-const Vec2 pos {100, 100}; 
+const Vec2 pos {100, 50}; 
 const float bias_factor = 0.05f;
 
-const size_t num_rows = 30;
-const size_t num_cols = 50;
+const size_t num_rows = 40;
+const size_t num_cols = 60;
 const size_t num_points = num_rows * num_cols;
-const size_t num_links = ((num_rows - 1) * num_cols) + ((num_cols - 1) * num_rows);
+const size_t num_iterations = 16;
 
 PhysicsObject intersections[num_points];
 std::vector<DistanceConstraint> constraints;
 
 Vec2 scale(size_t i, size_t j) 
 {
-    return {pos.x + i * allowed_distance * 1.0f - 1, pos.y + j * allowed_distance * 1.0f - 1};
+    return {pos.x + i * allowed_distance * 1.0f, pos.y + j * allowed_distance * 1.0f};
 }
 
 unsigned point_index(size_t i, size_t j)
@@ -110,7 +110,6 @@ int main()
         float dt = (SDL_GetTicks() - ticks_count) / 1000.0f; 
         ticks_count = SDL_GetTicks();
 
-        const size_t num_iterations = 14;
         for(size_t i = 0; i <= num_iterations; ++i) {
 
             float sub_dt = dt / (static_cast<float>(num_iterations));
