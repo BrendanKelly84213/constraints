@@ -14,6 +14,10 @@ On Fedora like systems: `# yum install sdl2-devel`
 
 On Arch based systems: `# sudo pacman -S sdl2`
 
+See here for installing on Mac OS: https://lazyfoo.net/tutorials/SDL/01_hello_SDL/mac/index.php
+
+And here for windows: https://lazyfoo.net/tutorials/SDL/01_hello_SDL/windows/index.php
+
 Or build from source: https://github.com/libsdl-org/SDL/releases/tag/release-2.24.1 with:
 
 ```
