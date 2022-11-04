@@ -8,7 +8,7 @@ Build with ` make `
 
 This program depends on SDL2
 
-On Debian / Ubuntu systems: `# apt install sdl2-dev` 
+On Debian / Ubuntu systems: `# apt install libsdl2-dev` 
 
 On Fedora like systems: `# yum install sdl2-devel`
 
